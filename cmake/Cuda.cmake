@@ -269,7 +269,7 @@ endif()
 foreach(diag cc_clobber_ignored integer_sign_change useless_using_declaration set_but_not_used)
   list(APPEND CUDA_NVCC_FLAGS -Xcudafe --diag_suppress=${diag})
 endforeach()
-
+set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} \"-D_FORCE_INLINES\" ")
 # setting default testing device
 if(NOT CUDA_TEST_DEVICE)
   set(CUDA_TEST_DEVICE -1)
