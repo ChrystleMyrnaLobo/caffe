@@ -20,9 +20,16 @@ sed -i '/prefetch queue empty/d' aux.txt
 sed -i '/Iteration .* loss/d' aux.txt
 sed -i '/Iteration .* lr/d' aux.txt
 sed -i '/Train net/d' aux.txt
+sed -i '/Missing true_pos for label/d' aux.txt
 grep 'Iteration ' aux.txt | sed  's/.*Iteration \([[:digit:]]*\).*/\1/g' > aux0.txt
 grep 'Test net output #0' aux.txt | awk '{print $11}' > aux1.txt
-grep 'Test net output #1' aux.txt | awk '{print $11}' > aux2.txt
+grep 'Test loss:' aux.txt | awk '{print $7}' > aux2.txt
+#grep 'Test net output #1' aux.txt | awk '{print $11}' > aux2.txt
+
+## Class wise accuracy
+grep 'class1:' aux.txt | awk '{print $6}' > class1.txt
+grep 'class2:' aux.txt | awk '{print $6}' > class2.txt
+grep 'class3:' aux.txt | awk '{print $6}' > class3.txt
 
 # Extracting elapsed seconds
 # For extraction of time since this line contains the start time
@@ -30,10 +37,15 @@ grep '] Solving ' $1 > aux3.txt
 grep 'Testing net' $1 >> aux3.txt
 $DIR/extract_seconds.py aux3.txt aux4.txt
 
+## Added class wise accuracy for test
+echo '#Iters Seconds TestAccuracy TestLoss TestDogAccuracy TestCowAccuracy TestSignboardAccuracy'> $LOG.test
+paste aux0.txt aux4.txt aux1.txt aux2.txt class1.txt class2.txt class3.txt | column -t >> $LOG.test
+rm aux.txt aux0.txt aux1.txt aux2.txt aux3.txt aux4.txt class1.txt class2.txt class3.txt
+
 # Generating
-echo '#Iters Seconds TestAccuracy TestLoss'> $LOG.test
-paste aux0.txt aux4.txt aux1.txt aux2.txt | column -t >> $LOG.test
-rm aux.txt aux0.txt aux1.txt aux2.txt aux3.txt aux4.txt
+#echo '#Iters Seconds TestAccuracy TestLoss'> $LOG.test
+#paste aux0.txt aux4.txt aux1.txt aux2.txt | column -t >> $LOG.test
+#rm aux.txt aux0.txt aux1.txt aux2.txt aux3.txt aux4.txt
 
 # For extraction of time since this line contains the start time
 grep '] Solving ' $1 > aux.txt

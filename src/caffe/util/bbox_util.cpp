@@ -726,8 +726,8 @@ void FindMatches(const vector<LabelBBox>& all_loc_preds,
       const MultiBoxLossParameter& multibox_loss_param,
       vector<map<int, vector<float> > >* all_match_overlaps,
       vector<map<int, vector<int> > >* all_match_indices) {
-  // all_match_overlaps->clear();
-  // all_match_indices->clear();
+   all_match_overlaps->clear();
+   all_match_indices->clear();
   // Get parameters.
   CHECK(multibox_loss_param.has_num_classes()) << "Must provide num_classes.";
   const int num_classes = multibox_loss_param.num_classes();
@@ -860,7 +860,7 @@ void MineHardExamples(const Blob<Dtype>& conf_blob,
   int num = all_loc_preds.size();
   // CHECK_EQ(num, all_match_overlaps.size());
   // CHECK_EQ(num, all_match_indices->size());
-  // all_neg_indices->clear();
+  all_neg_indices->clear();
   *num_matches = CountNumMatches(*all_match_indices, num);
   *num_negs = 0;
   int num_priors = prior_bboxes.size();
@@ -1995,7 +1995,8 @@ void CumSum(const vector<pair<float, int> >& pairs, vector<int>* cumsum) {
 
 void ComputeAP(const vector<pair<float, int> >& tp, const int num_pos,
                const vector<pair<float, int> >& fp, const string ap_version,
-               vector<float>* prec, vector<float>* rec, float* ap) {
+               vector<float>* prec, vector<float>* rec, float* ap
+               , vector<float>* mx_prec) {
   const float eps = 1e-6;
   CHECK_EQ(tp.size(), fp.size()) << "tp must have same size as fp.";
   const int num = tp.size();
@@ -2054,6 +2055,7 @@ void ComputeAP(const vector<pair<float, int> >& tp, const int num_pos,
     }
     for (int j = 10; j >= 0; --j) {
       *ap += max_precs[j] / 11;
+      mx_prec->push_back(max_precs[j]); // Save max_precs (prcurve)
     }
   } else if (ap_version == "MaxIntegral") {
     // VOC2012 or ILSVRC style for computing AP.

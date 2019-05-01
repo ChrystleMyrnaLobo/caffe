@@ -259,7 +259,9 @@ message SolverParameter {
   optional string ap_version = 42 [default = "Integral"];
   // If true, display per class result.
   optional bool show_per_class_result = 44 [default = false];
-
+  // If true, display pr value of per class (prcurve)
+  optional bool show_pr_value = 45 [default = false];
+ 
   // The number of iterations for each test net.
   repeated int32 test_iter = 3;
 

@@ -532,12 +532,19 @@ void Solver<Dtype>::TestDetection(const int test_net_id) {
       }
       const vector<pair<float, int> >& label_false_pos =
           false_pos.find(label)->second;
-      vector<float> prec, rec;
+      vector<float> prec, rec, p_r; // added p_r vector (prcurve)
       ComputeAP(label_true_pos, label_num_pos, label_false_pos,
-                param_.ap_version(), &prec, &rec, &(APs[label]));
+                param_.ap_version(), &prec, &rec, &(APs[label])
+                , &p_r);
       mAP += APs[label];
       if (param_.show_per_class_result()) {
         LOG(INFO) << "class" << label << ": " << APs[label];
+        // add a bool param (prcurve)
+        if(param_.show_pr_value()) { 
+          for(int i=0; i<p_r.size(); i++){
+            LOG(INFO) << "class" << label << " p-r value " << i << ": " << p_r[i]; // print p_r value (11points) (prcurve)
+          }
+        }
       }
     }
     mAP /= num_pos.size();

@@ -450,9 +450,11 @@ void CumSum(const vector<pair<float, int> >& pairs, vector<int>* cumsum);
 //    prec: stores the computed precisions.
 //    rec: stores the computed recalls.
 //    ap: the computed Average Precision.
+//    mx_prec: max precision for 11 points (prcurve)
 void ComputeAP(const vector<pair<float, int> >& tp, const int num_pos,
                const vector<pair<float, int> >& fp, const string ap_version,
-               vector<float>* prec, vector<float>* rec, float* ap);
+               vector<float>* prec, vector<float>* rec, float* ap
+               , vector<float>* mx_prec);
 
 #ifndef CPU_ONLY  // GPU
 template <typename Dtype>
