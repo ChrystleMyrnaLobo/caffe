@@ -25,10 +25,21 @@ grep 'Iteration ' aux.txt | sed  's/.*Iteration \([[:digit:]]*\).*/\1/g' > aux0.
 grep 'Test net output #0' aux.txt | awk '{print $11}' > aux1.txt
 grep 'Test loss:' aux.txt | awk '{print $7}' > aux2.txt
 
+## Fill the claa label and corresponding idx
+#TODO get this from label map
+
+## MAVI v2 dataset
+#class_idx=(1 2 3)
+#class_label=("Dog" "Cow" "Signboard")
+
+## coco INTERSECT mavi labels
+class_idx=(17 20)
+class_label=("Dog" "Cow")
+
 # Precision Recall Curve table
 # Extract class wise precision and recall values from the log
 echo "" > pr.txt
-for idx in 1 2 3
+for idx in ${class_idx[@]}; 
 do
   grep "class${idx} p-r value " aux.txt | awk '{print $9}' > pr_class.txt  
   paste pr.txt pr_class.txt | column -t  > tmp.txt
@@ -37,17 +48,37 @@ do
 done
 
 # Make table of pr values
-echo 'Recall PrecisionDog PrecisionCow PrecisionSignboard ' > $LOG.prcurve
+header="Recall"
+for label in ${class_label[@]}; 
+do
+  header+=" Precision${label}"
+done
+echo $header > $LOG.prcurve
+#echo 'Recall PrecisionDog PrecisionCow PrecisionSignboard ' > $LOG.prcurve
 paste rc.txt pr.txt | column -t >> $LOG.prcurve
 rm pr_class.txt pr.txt rc.txt
 
 # Class wise accuracy
-grep 'class1:' aux.txt | awk '{print $6}' > class1.txt
-grep 'class2:' aux.txt | awk '{print $6}' > class2.txt
-grep 'class3:' aux.txt | awk '{print $6}' > class3.txt
+echo "" > ap.txt
+for idx in ${class_idx[@]}; 
+do
+  grep "class${idx}:" aux.txt | awk '{print $6}' > ap_class.txt
+  paste ap.txt ap_class.txt | column -t > tmp.txt
+  mv tmp.txt ap.txt
+done
+#grep 'class1:' aux.txt | awk '{print $6}' > class1.txt
+#grep 'class2:' aux.txt | awk '{print $6}' > class2.txt
+#grep 'class3:' aux.txt | awk '{print $6}' > class3.txt
 
 # Summary of accuracy
-echo '#Iters TestAccuracy TestLoss TestDogAccuracy TestCowAccuracy TestSignboardAccuracy'> $LOG.summary
-paste aux0.txt aux1.txt aux2.txt class1.txt class2.txt class3.txt | column -t >> $LOG.summary
-rm aux.txt aux0.txt aux1.txt aux2.txt class1.txt class2.txt class3.txt
-
+header="#Iters TestAccuracy TestLoss"
+for label in ${class_label[@]}; 
+do
+  header+=" Test${label}Accuracy"
+done
+echo $header > $LOG.summary
+#echo '#Iters TestAccuracy TestLoss TestDogAccuracy TestCowAccuracy TestSignboardAccuracy'> $LOG.summary
+#paste aux0.txt aux1.txt aux2.txt class1.txt class2.txt class3.txt | column -t >> $LOG.summary
+#rm aux.txt aux0.txt aux1.txt aux2.txt class1.txt class2.txt class3.txt
+paste aux0.txt aux1.txt aux2.txt ap.txt | column -t >> $LOG.summary
+rm aux.txt aux0.txt aux1.txt aux2.txt ap.txt ap_class.txt

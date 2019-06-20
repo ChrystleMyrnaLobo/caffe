@@ -51,22 +51,28 @@ def plot_chart(path_to_png, path_to_log):
   
   # #Iter Loss Accuracy DogAccuracy CowAccuracy SignboardAccuracy
   data_file = get_summary_file(path_to_log)
-  smm = np.loadtxt(data_file, skiprows=1)
-  
+  #smm = np.loadtxt(data_file, skiprows=1)
+  smm = np.genfromtxt(data_file, names=True)
+    
   mean_precision = np.mean(data[:,1:],axis=1)
   recall = np.divide(data[:,0],10)
 
-  title = 'Dog, AP={}'.format(smm[3]*100)
-  plot_curve(title, recall, data[:,1], "dog_"+path_to_png)
-  
-  title = 'Cow, AP={}'.format(smm[4]*100)
-  plot_curve(title, recall, data[:,2], "cow_"+path_to_png)
- 
-  title ='Signboard, AP={}'.format(smm[5]*100)
-  plot_curve(title, recall, data[:,3], "signboard_"+path_to_png)
-
-  title = 'Overall, AP={}'.format(smm[2]*100)
+  title = 'Overall, AP={}'.format(smm["TestLoss"]*100)
   plot_curve(title, recall, mean_precision, path_to_png)
+
+  idx = 1
+  header = smm.dtype.names
+  for key in header[3:]:  
+    label = key[4:-8]
+    title = '{}, AP={}'.format(label, smm[key]*100)
+    plot_curve(title, recall, data[:,idx], "{}_{}".format(label,path_to_png))
+    idx += 1
+  
+  #title = 'Cow, AP={}'.format(smm[4]*100)
+  #plot_curve(title, recall, data[:,2], "cow_"+path_to_png)
+ 
+  #title ='Signboard, AP={}'.format(smm[5]*100)
+  #plot_curve(title, recall, data[:,3], "signboard_"+path_to_png)
 
 if __name__ == '__main__':
   if len(sys.argv) < 1:
